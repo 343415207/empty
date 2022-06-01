@@ -34,7 +34,6 @@ const fs_1 = __importDefault(require("fs"));
 const instructions_1 = require("./instructions");
 const loglevel_1 = __importDefault(require("loglevel"));
 const spl_token_1 = require("@solana/spl-token");
-const various_1 = require("./various");
 const bytes_1 = require("@project-serum/anchor/dist/cjs/utils/bytes");
 // TODO: expose in spl package
 const deserializeAccount = (data) => {
@@ -303,13 +302,13 @@ function loadWalletKey(keypair) {
     return loaded;
 }
 exports.loadWalletKey = loadWalletKey;
-async function loadCandyProgram(walletKeyPair, env, customRpcUrl) {
+async function loadCandyProgram(walletKeyPair, customRpcUrl) {
     if (customRpcUrl)
         console.log('USING CUSTOM URL', customRpcUrl);
     // @ts-ignore
     const solConnection = new anchor.web3.Connection(
     //@ts-ignore
-    customRpcUrl || (0, various_1.getCluster)(env));
+    customRpcUrl);
     const walletWrapper = new anchor.Wallet(walletKeyPair);
     const provider = new anchor.Provider(solConnection, walletWrapper, {
         preflightCommitment: 'recent',
@@ -320,13 +319,13 @@ async function loadCandyProgram(walletKeyPair, env, customRpcUrl) {
     return program;
 }
 exports.loadCandyProgram = loadCandyProgram;
-async function loadCandyProgramV2(walletKeyPair, env, customRpcUrl) {
+async function loadCandyProgramV2(walletKeyPair, customRpcUrl) {
     if (customRpcUrl)
         console.log('USING CUSTOM URL', customRpcUrl);
     // @ts-ignore
     const solConnection = new anchor.web3.Connection(
     //@ts-ignore
-    customRpcUrl || (0, various_1.getCluster)(env));
+    customRpcUrl);
     const walletWrapper = new anchor.Wallet(walletKeyPair);
     const provider = new anchor.Provider(solConnection, walletWrapper, {
         preflightCommitment: 'recent',
@@ -337,13 +336,13 @@ async function loadCandyProgramV2(walletKeyPair, env, customRpcUrl) {
     return program;
 }
 exports.loadCandyProgramV2 = loadCandyProgramV2;
-async function loadFairLaunchProgram(walletKeyPair, env, customRpcUrl) {
+async function loadFairLaunchProgram(walletKeyPair, customRpcUrl) {
     if (customRpcUrl)
         console.log('USING CUSTOM URL', customRpcUrl);
     // @ts-ignore
     const solConnection = new anchor.web3.Connection(
     //@ts-ignore
-    customRpcUrl || (0, various_1.getCluster)(env));
+    customRpcUrl);
     const walletWrapper = new anchor.Wallet(walletKeyPair);
     const provider = new anchor.Provider(solConnection, walletWrapper, {
         preflightCommitment: 'recent',
@@ -352,13 +351,13 @@ async function loadFairLaunchProgram(walletKeyPair, env, customRpcUrl) {
     return new anchor.Program(idl, constants_1.FAIR_LAUNCH_PROGRAM_ID, provider);
 }
 exports.loadFairLaunchProgram = loadFairLaunchProgram;
-async function loadAuctionHouseProgram(walletKeyPair, env, customRpcUrl) {
+async function loadAuctionHouseProgram(walletKeyPair, customRpcUrl) {
     if (customRpcUrl)
         console.log('USING CUSTOM URL', customRpcUrl);
     // @ts-ignore
     const solConnection = new anchor.web3.Connection(
     //@ts-ignore
-    customRpcUrl || (0, various_1.getCluster)(env));
+    customRpcUrl);
     const walletWrapper = new anchor.Wallet(walletKeyPair);
     const provider = new anchor.Provider(solConnection, walletWrapper, {
         preflightCommitment: 'recent',
@@ -367,13 +366,13 @@ async function loadAuctionHouseProgram(walletKeyPair, env, customRpcUrl) {
     return new anchor.Program(idl, constants_1.AUCTION_HOUSE_PROGRAM_ID, provider);
 }
 exports.loadAuctionHouseProgram = loadAuctionHouseProgram;
-async function loadTokenEntanglementProgream(walletKeyPair, env, customRpcUrl) {
+async function loadTokenEntanglementProgream(walletKeyPair, customRpcUrl) {
     if (customRpcUrl)
         console.log('USING CUSTOM URL', customRpcUrl);
     // @ts-ignore
     const solConnection = new anchor.web3.Connection(
     //@ts-ignore
-    customRpcUrl || (0, various_1.getCluster)(env));
+    customRpcUrl);
     const walletWrapper = new anchor.Wallet(walletKeyPair);
     const provider = new anchor.Provider(solConnection, walletWrapper, {
         preflightCommitment: 'recent',
@@ -400,12 +399,12 @@ async function getTokenAmount(anchorProgram, account, mint) {
     return amount;
 }
 exports.getTokenAmount = getTokenAmount;
-const getBalance = async (account, env, customRpcUrl) => {
+const getBalance = async (account, customRpcUrl) => {
     if (customRpcUrl)
         console.log('USING CUSTOM URL', customRpcUrl);
     const connection = new anchor.web3.Connection(
     //@ts-ignore
-    customRpcUrl || (0, various_1.getCluster)(env));
+    customRpcUrl);
     return await connection.getBalance(account);
 };
 exports.getBalance = getBalance;

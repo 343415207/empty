@@ -1,91 +1,60 @@
 #!/usr/bin/env ts-node
 import * as fs from 'fs';
+import * as path from 'path';
 import { program } from 'commander';
-
+import {IMintConfig} from './config/config'
 import { PublicKey } from '@solana/web3.js';
-import {
-  CACHE_PATH
-} from './helpers/constants';
+// import {
+//   CACHE_PATH
+// } from './helpers/constants';
 
 
 import { mintV2 } from './commands/mint';
 import log from 'loglevel';
 
+import {loadWalletKey} from './helpers/accounts'
+
 program.version('0.0.2');
 
-if (!fs.existsSync(CACHE_PATH)) {
-  fs.mkdirSync(CACHE_PATH);
-}
+// if (!fs.existsSync(CACHE_PATH)) {
+//   fs.mkdirSync(CACHE_PATH);
+// }
 log.setLevel(log.levels.INFO);
 
 programCommand('mint_one_token')
-  .option(
-    '-r, --rpc-url <string>',
-    'custom rpc url since this is a heavy command',
-  )
-  .action(async (directory, cmd) => {
-    const { keypair, env, candy, rpcUrl } = cmd.opts();
-    const candyMachine = new PublicKey(candy);
-    const tx = await mintV2(keypair, env, candyMachine, rpcUrl);
-
-    log.info('mint_one_token finished', tx);
-  });
-
-programCommand('mint_multiple_tokens')
-  .requiredOption('-n, --number <string>', 'Number of tokens')
-  .option(
-    '-r, --rpc-url <string>',
-    'custom rpc url since this is a heavy command',
-  )
   .action(async (_, cmd) => {
-    const { keypair, env, candy, number, rpcUrl } = cmd.opts();
+    
+    let currentDir:string = process.cwd();
+    let walletsDir:string =   currentDir + "/config/wallet";
+    
+    const wallets:string[] = fs.readdirSync(walletsDir).map(file => path.join(walletsDir, file));
 
-    const NUMBER_OF_NFTS_TO_MINT = parseInt(number, 10);
-    const candyMachine = new PublicKey(candy);
-    log.info(`Minting ${NUMBER_OF_NFTS_TO_MINT} tokens...`);
+    if(wallets.length<=0) {
+        log.info("please input your walllet file into config/wallets");
+        return
+    }
+    
+    let configData:IMintConfig  = JSON.parse(fs.readFileSync(currentDir + "/config/config.json").toString());
 
-    const mintToken = async index => {
-      const tx = await mintV2(keypair, env, candyMachine, rpcUrl);
-      log.info(`transaction ${index + 1} complete`, tx);
+    log.info("config is : " + JSON.stringify(configData));
+    
+    const servers:string[] = configData.server_endpoint.split(",");
 
-      if (index < NUMBER_OF_NFTS_TO_MINT - 1) {
-        log.info('minting another token...');
-        await mintToken(index + 1);
-      }
-    };
-
-    await mintToken(0);
-
-    log.info(`minted ${NUMBER_OF_NFTS_TO_MINT} tokens`);
-    log.info('mint_multiple_tokens finished');
+    const candyMachine = new PublicKey(configData.candy_machine_address);
+      for (let index = 0; index < wallets.length; index++) {
+        const rpcUrl = servers[index%servers.length]; 
+        const walletPath = wallets[index];
+        let keypair = loadWalletKey(walletPath)
+        const tx = await mintV2(keypair, candyMachine, rpcUrl);
+        log.info('mint_one_token server: '  + rpcUrl  + ',  wallet: ' + index  + ' finished', tx);
+      }  
   });
 
 function programCommand(
   name: string,
   options: { requireWallet: boolean } = { requireWallet: true },
 ) {
-  let cmProgram = program
-    .command(name)
-    .option(
-      '-e, --env <string>',
-      'Solana cluster env name',
-      'devnet', //mainnet-beta, testnet, devnet
-    )
-    .option(
-      '-candy, --candy <string>',
-      'candy machine address',
-      '',
-    )
-    .option('-l, --log-level <string>', 'log level', setLogLevel)
-    .option('-c, --cache-name <string>', 'Cache file name', 'temp');
-
-  if (options.requireWallet) {
-    cmProgram = cmProgram.requiredOption(
-      '-k, --keypair <path>',
-      `Solana wallet location`,
-    );
-  }
-
+  let cmProgram = program.command(name)
   return cmProgram;
 }
 
