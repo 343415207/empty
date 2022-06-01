@@ -25,10 +25,8 @@ programCommand('mint_one_token')
     'custom rpc url since this is a heavy command',
   )
   .action(async (directory, cmd) => {
-    const { keypair, env, cacheName, rpcUrl } = cmd.opts();
-
-    const cacheContent = loadCache(cacheName, env);
-    const candyMachine = new PublicKey(cacheContent.program.candyMachine);
+    const { keypair, env, candyMachinePk, rpcUrl } = cmd.opts();
+    const candyMachine = new PublicKey(candyMachinePk);
     const tx = await mintV2(keypair, env, candyMachine, rpcUrl);
 
     log.info('mint_one_token finished', tx);
@@ -41,12 +39,10 @@ programCommand('mint_multiple_tokens')
     'custom rpc url since this is a heavy command',
   )
   .action(async (_, cmd) => {
-    const { keypair, env, cacheName, number, rpcUrl } = cmd.opts();
+    const { keypair, env, candyMachinePK, number, rpcUrl } = cmd.opts();
 
     const NUMBER_OF_NFTS_TO_MINT = parseInt(number, 10);
-    const cacheContent = loadCache(cacheName, env);
-    const candyMachine = new PublicKey(cacheContent.program.candyMachine);
-
+    const candyMachine = new PublicKey(candyMachinePK);
     log.info(`Minting ${NUMBER_OF_NFTS_TO_MINT} tokens...`);
 
     const mintToken = async index => {
