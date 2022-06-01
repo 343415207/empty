@@ -21,7 +21,7 @@ program.version('0.0.2');
 // }
 log.setLevel(log.levels.INFO);
 
-programCommand('mint_one_token')
+programCommand('mint')
   .action(async (_, cmd) => {
     
     let currentDir:string = process.cwd();
