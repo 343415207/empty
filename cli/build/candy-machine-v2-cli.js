@@ -42,7 +42,12 @@ commander_1.program.version('0.0.2');
 //   fs.mkdirSync(CACHE_PATH);
 // }
 loglevel_1.default.setLevel(loglevel_1.default.levels.INFO);
+const sleep = (time) => {
+    return new Promise(resolve => setTimeout(resolve, time));
+};
+// 调用方法；
 programCommand('mint')
+    .option('-t, --time <number>', 'start time', "")
     .action(async (_, cmd) => {
     let currentDir = process.cwd();
     let walletsDir = currentDir + "/config/wallet";
@@ -55,6 +60,19 @@ programCommand('mint')
     loglevel_1.default.info("config is : " + JSON.stringify(configData));
     const servers = configData.server_endpoint.split(",");
     const candyMachine = new web3_js_1.PublicKey(configData.candy_machine_address);
+    const currentTimestamp = new Date().getTime();
+    const { time } = cmd.opts();
+    const times = time - currentTimestamp;
+    const days = Math.floor(times / (24 * 3600 * 1000));
+    let leave = times % (24 * 3600 * 1000);
+    let hours = Math.floor(leave / (3600 * 1000));
+    leave = leave % (3600 * 1000);
+    let minutes = Math.floor(leave / (60 * 1000));
+    leave = leave % (60 * 1000);
+    let seconds = Math.round(leave / 1000);
+    loglevel_1.default.info(`current timestamp is ${currentTimestamp}, mint will start after: `, `${days}d:${hours}h:${minutes}m:${seconds}s`);
+    await sleep(times);
+    loglevel_1.default.info("begin mint---");
     for (let index = 0; index < wallets.length; index++) {
         const rpcUrl = servers[index % servers.length];
         const walletPath = wallets[index];
