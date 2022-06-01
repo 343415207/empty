@@ -31,7 +31,6 @@ const fs = __importStar(require("fs"));
 const commander_1 = require("commander");
 const web3_js_1 = require("@solana/web3.js");
 const constants_1 = require("./helpers/constants");
-const cache_1 = require("./helpers/cache");
 const mint_1 = require("./commands/mint");
 const loglevel_1 = __importDefault(require("loglevel"));
 commander_1.program.version('0.0.2');
@@ -42,9 +41,8 @@ loglevel_1.default.setLevel(loglevel_1.default.levels.INFO);
 programCommand('mint_one_token')
     .option('-r, --rpc-url <string>', 'custom rpc url since this is a heavy command')
     .action(async (directory, cmd) => {
-    const { keypair, env, cacheName, rpcUrl } = cmd.opts();
-    const cacheContent = (0, cache_1.loadCache)(cacheName, env);
-    const candyMachine = new web3_js_1.PublicKey(cacheContent.program.candyMachine);
+    const { keypair, env, candy, rpcUrl } = cmd.opts();
+    const candyMachine = new web3_js_1.PublicKey(candy);
     const tx = await (0, mint_1.mintV2)(keypair, env, candyMachine, rpcUrl);
     loglevel_1.default.info('mint_one_token finished', tx);
 });
@@ -52,10 +50,9 @@ programCommand('mint_multiple_tokens')
     .requiredOption('-n, --number <string>', 'Number of tokens')
     .option('-r, --rpc-url <string>', 'custom rpc url since this is a heavy command')
     .action(async (_, cmd) => {
-    const { keypair, env, cacheName, number, rpcUrl } = cmd.opts();
+    const { keypair, env, candy, number, rpcUrl } = cmd.opts();
     const NUMBER_OF_NFTS_TO_MINT = parseInt(number, 10);
-    const cacheContent = (0, cache_1.loadCache)(cacheName, env);
-    const candyMachine = new web3_js_1.PublicKey(cacheContent.program.candyMachine);
+    const candyMachine = new web3_js_1.PublicKey(candy);
     loglevel_1.default.info(`Minting ${NUMBER_OF_NFTS_TO_MINT} tokens...`);
     const mintToken = async (index) => {
         const tx = await (0, mint_1.mintV2)(keypair, env, candyMachine, rpcUrl);
@@ -73,6 +70,7 @@ function programCommand(name, options = { requireWallet: true }) {
     let cmProgram = commander_1.program
         .command(name)
         .option('-e, --env <string>', 'Solana cluster env name', 'devnet')
+        .option('-candy, --candy <string>', 'candy machine address', '')
         .option('-l, --log-level <string>', 'log level', setLogLevel)
         .option('-c, --cache-name <string>', 'Cache file name', 'temp');
     if (options.requireWallet) {
