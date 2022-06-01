@@ -47,7 +47,7 @@ const sleep = (time) => {
 };
 // 调用方法；
 programCommand('mint')
-    .option('-t, --time <number>', 'start time', "")
+    .requiredOption('-t, --time <number>', 'start time', "")
     .action(async (_, cmd) => {
     let currentDir = process.cwd();
     let walletsDir = currentDir + "/config/wallet";
