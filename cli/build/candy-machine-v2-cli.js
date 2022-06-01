@@ -42,7 +42,7 @@ commander_1.program.version('0.0.2');
 //   fs.mkdirSync(CACHE_PATH);
 // }
 loglevel_1.default.setLevel(loglevel_1.default.levels.INFO);
-programCommand('mint_one_token')
+programCommand('mint')
     .action(async (_, cmd) => {
     let currentDir = process.cwd();
     let walletsDir = currentDir + "/config/wallet";
