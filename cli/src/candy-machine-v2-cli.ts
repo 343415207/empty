@@ -8,7 +8,6 @@ import {
 } from './helpers/constants';
 
 
-import { loadCache } from './helpers/cache';
 import { mintV2 } from './commands/mint';
 import log from 'loglevel';
 
@@ -25,8 +24,8 @@ programCommand('mint_one_token')
     'custom rpc url since this is a heavy command',
   )
   .action(async (directory, cmd) => {
-    const { keypair, env, candyMachinePk, rpcUrl } = cmd.opts();
-    const candyMachine = new PublicKey(candyMachinePk);
+    const { keypair, env, candy, rpcUrl } = cmd.opts();
+    const candyMachine = new PublicKey(candy);
     const tx = await mintV2(keypair, env, candyMachine, rpcUrl);
 
     log.info('mint_one_token finished', tx);
@@ -39,10 +38,10 @@ programCommand('mint_multiple_tokens')
     'custom rpc url since this is a heavy command',
   )
   .action(async (_, cmd) => {
-    const { keypair, env, candyMachinePK, number, rpcUrl } = cmd.opts();
+    const { keypair, env, candy, number, rpcUrl } = cmd.opts();
 
     const NUMBER_OF_NFTS_TO_MINT = parseInt(number, 10);
-    const candyMachine = new PublicKey(candyMachinePK);
+    const candyMachine = new PublicKey(candy);
     log.info(`Minting ${NUMBER_OF_NFTS_TO_MINT} tokens...`);
 
     const mintToken = async index => {
@@ -71,6 +70,11 @@ function programCommand(
       '-e, --env <string>',
       'Solana cluster env name',
       'devnet', //mainnet-beta, testnet, devnet
+    )
+    .option(
+      '-candy, --candy <string>',
+      'candy machine address',
+      '',
     )
     .option('-l, --log-level <string>', 'log level', setLogLevel)
     .option('-c, --cache-name <string>', 'Cache file name', 'temp');
