@@ -15,8 +15,9 @@ export const MAX_CREATOR_LIMIT = 5;
 export const ARWEAVE_PAYMENT_WALLET = new PublicKey(
   '6FKvsq4ydWFci6nGq9ckbjYMtnmaqAoatz5c9XWjiDuS',
 );
+//cndyAnrLdpjq1Ssp1z8xxDsB8dxe7u4HL5Nxi2K5WXZ
 export const CANDY_MACHINE_PROGRAM_ID = new PublicKey(
-  'cndyAnrLdpjq1Ssp1z8xxDsB8dxe7u4HL5Nxi2K5WXZ',
+  'CMZYPASGWeTz7RNGHaRJfCq2XQ5pYK6nDvVQxzkH51zb',
 );
 //cndy3Z4yapfJBmL3ShUp5exZKqR3z33thTzeNMm2gRZ
 export const CANDY_MACHINE_PROGRAM_V2_ID = new PublicKey(
