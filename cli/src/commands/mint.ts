@@ -168,13 +168,14 @@ export async function mintV2(
   const mint = Keypair.generate();
 
   const userKeyPair = keypair;
-  // const anchorProgram = await loadCandyProgramV2(userKeyPair, rpcUrl);
-  const anchorProgram = await loadCandyProgram(userKeyPair, rpcUrl)
+  const anchorProgram = await loadCandyProgramV2(userKeyPair, rpcUrl);
+  console.log("anchorProgram : ", anchorProgram)
+  // const anchorProgram = await loadCandyProgram(userKeyPair, rpcUrl)
   const userTokenAccountAddress = await getTokenWallet(
     userKeyPair.publicKey,
     mint.publicKey,
   );
-
+  console.log("userTokenAccountAddress : ", userTokenAccountAddress)
   const candyMachine: CandyMachine =
     await anchorProgram.account.candyMachine.fetch(candyMachineAddress);
   console.log("CandyMachine : ", candyMachine)
