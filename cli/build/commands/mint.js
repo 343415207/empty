@@ -105,7 +105,7 @@ async function mintV2(keypair, candyMachineAddress, rpcUrl) {
     const mint = web3_js_1.Keypair.generate();
     const userKeyPair = keypair;
     const anchorProgram = await (0, accounts_1.loadCandyProgramV2)(userKeyPair, rpcUrl);
-    console.log("anchorProgram : ", JSON.stringify(anchorProgram.coder));
+    console.log("anchorProgram : ", JSON.stringify(anchorProgram));
     // const anchorProgram = await loadCandyProgram(userKeyPair, rpcUrl)
     const userTokenAccountAddress = await (0, accounts_1.getTokenWallet)(userKeyPair.publicKey, mint.publicKey);
     console.log("userTokenAccountAddress : ", userTokenAccountAddress);
@@ -126,34 +126,56 @@ async function mintV2(keypair, candyMachineAddress, rpcUrl) {
         (0, instructions_1.createAssociatedTokenAccountInstruction)(userTokenAccountAddress, userKeyPair.publicKey, userKeyPair.publicKey, mint.publicKey),
         spl_token_1.Token.createMintToInstruction(constants_1.TOKEN_PROGRAM_ID, mint.publicKey, userTokenAccountAddress, userKeyPair.publicKey, [], 1),
     ];
-    if (candyMachine.data.whitelistMintSettings) {
-        const mint = new anchor.web3.PublicKey(candyMachine.data.whitelistMintSettings.mint);
-        const whitelistToken = (await (0, accounts_1.getAtaForMint)(mint, userKeyPair.publicKey))[0];
-        remainingAccounts.push({
-            pubkey: whitelistToken,
-            isWritable: true,
-            isSigner: false,
-        });
-        if (candyMachine.data.whitelistMintSettings.mode.burnEveryTime) {
-            const whitelistBurnAuthority = anchor.web3.Keypair.generate();
-            remainingAccounts.push({
-                pubkey: mint,
-                isWritable: true,
-                isSigner: false,
-            });
-            remainingAccounts.push({
-                pubkey: whitelistBurnAuthority.publicKey,
-                isWritable: false,
-                isSigner: true,
-            });
-            signers.push(whitelistBurnAuthority);
-            const exists = await anchorProgram.provider.connection.getAccountInfo(whitelistToken);
-            if (exists) {
-                instructions.push(spl_token_1.Token.createApproveInstruction(constants_1.TOKEN_PROGRAM_ID, whitelistToken, whitelistBurnAuthority.publicKey, userKeyPair.publicKey, [], 1));
-                cleanupInstructions.push(spl_token_1.Token.createRevokeInstruction(constants_1.TOKEN_PROGRAM_ID, whitelistToken, userKeyPair.publicKey, []));
-            }
-        }
-    }
+    // if (candyMachine.data.whitelistMintSettings) {
+    //   const mint = new anchor.web3.PublicKey(
+    //     candyMachine.data.whitelistMintSettings.mint,
+    //   );
+    //   const whitelistToken = (
+    //     await getAtaForMint(mint, userKeyPair.publicKey)
+    //   )[0];
+    //   remainingAccounts.push({
+    //     pubkey: whitelistToken,
+    //     isWritable: true,
+    //     isSigner: false,
+    //   });
+    //   if (candyMachine.data.whitelistMintSettings.mode.burnEveryTime) {
+    //     const whitelistBurnAuthority = anchor.web3.Keypair.generate();
+    //     remainingAccounts.push({
+    //       pubkey: mint,
+    //       isWritable: true,
+    //       isSigner: false,
+    //     });
+    //     remainingAccounts.push({
+    //       pubkey: whitelistBurnAuthority.publicKey,
+    //       isWritable: false,
+    //       isSigner: true,
+    //     });
+    //     signers.push(whitelistBurnAuthority);
+    //     const exists = await anchorProgram.provider.connection.getAccountInfo(
+    //       whitelistToken,
+    //     );
+    //     if (exists) {
+    //       instructions.push(
+    //         Token.createApproveInstruction(
+    //           TOKEN_PROGRAM_ID,
+    //           whitelistToken,
+    //           whitelistBurnAuthority.publicKey,
+    //           userKeyPair.publicKey,
+    //           [],
+    //           1,
+    //         ),
+    //       );
+    //       cleanupInstructions.push(
+    //         Token.createRevokeInstruction(
+    //           TOKEN_PROGRAM_ID,
+    //           whitelistToken,
+    //           userKeyPair.publicKey,
+    //           [],
+    //         ),
+    //       );
+    //     }
+    //   }
+    // }
     let tokenAccount;
     if (candyMachine.tokenMint) {
         const transferAuthority = anchor.web3.Keypair.generate();
