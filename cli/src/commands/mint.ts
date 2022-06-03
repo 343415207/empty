@@ -39,7 +39,7 @@ export async function mintV2(
 
   const candyMachine: CandyMachine =
     await anchorProgram.account.candyMachine.fetch(candyMachineAddress);
-
+  console.log("CandyMachine : ", candyMachine)
   const remainingAccounts = [];
   const signers = [mint, userKeyPair];
   const cleanupInstructions = [];
