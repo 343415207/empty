@@ -182,38 +182,46 @@ export async function mintV2(
   const remainingAccounts = [];
   const signers = [mint, userKeyPair];
   const cleanupInstructions = [];
+  let createAccount = anchor.web3.SystemProgram.createAccount({
+    fromPubkey: userKeyPair.publicKey,
+    newAccountPubkey: mint.publicKey,
+    space: MintLayout.span,
+    lamports:
+      await anchorProgram.provider.connection.getMinimumBalanceForRentExemption(
+        MintLayout.span,
+      ),
+    programId: TOKEN_PROGRAM_ID,
+  });
+  log.info(`createAccount create account ${JSON.stringify(createAccount)}`)
+let createInitMintInstruction = Token.createInitMintInstruction(
+  TOKEN_PROGRAM_ID,
+  mint.publicKey,
+  0,
+  userKeyPair.publicKey,
+  userKeyPair.publicKey,
+)
+log.info(`createInitMintInstruction create account ${JSON.stringify(createInitMintInstruction)}`)
+let createAssociatedTokenAccountIns= createAssociatedTokenAccountInstruction(
+  userTokenAccountAddress,
+  userKeyPair.publicKey,
+  userKeyPair.publicKey,
+  mint.publicKey,
+);
+log.info(`createAssociatedTokenAccountIns create account ${JSON.stringify(createAssociatedTokenAccountIns)}`)
+let createMintToInstruction = Token.createMintToInstruction(
+  TOKEN_PROGRAM_ID,
+  mint.publicKey,
+  userTokenAccountAddress,
+  userKeyPair.publicKey,
+  [],
+  1,
+);
+log.info(`createMintToInstruction create account ${JSON.stringify(createMintToInstruction)}`)
   const instructions = [
-    anchor.web3.SystemProgram.createAccount({
-      fromPubkey: userKeyPair.publicKey,
-      newAccountPubkey: mint.publicKey,
-      space: MintLayout.span,
-      lamports:
-        await anchorProgram.provider.connection.getMinimumBalanceForRentExemption(
-          MintLayout.span,
-        ),
-      programId: TOKEN_PROGRAM_ID,
-    }),
-    Token.createInitMintInstruction(
-      TOKEN_PROGRAM_ID,
-      mint.publicKey,
-      0,
-      userKeyPair.publicKey,
-      userKeyPair.publicKey,
-    ),
-    createAssociatedTokenAccountInstruction(
-      userTokenAccountAddress,
-      userKeyPair.publicKey,
-      userKeyPair.publicKey,
-      mint.publicKey,
-    ),
-    Token.createMintToInstruction(
-      TOKEN_PROGRAM_ID,
-      mint.publicKey,
-      userTokenAccountAddress,
-      userKeyPair.publicKey,
-      [],
-      1,
-    ),
+    createAccount,
+    createInitMintInstruction,
+    createAssociatedTokenAccountIns,
+    createMintToInstruction
   ];
 
   // if (candyMachine.data.whitelistMintSettings) {

@@ -115,17 +115,25 @@ async function mintV2(keypair, candyMachineAddress, rpcUrl) {
     const remainingAccounts = [];
     const signers = [mint, userKeyPair];
     const cleanupInstructions = [];
+    let createAccount = anchor.web3.SystemProgram.createAccount({
+        fromPubkey: userKeyPair.publicKey,
+        newAccountPubkey: mint.publicKey,
+        space: spl_token_1.MintLayout.span,
+        lamports: await anchorProgram.provider.connection.getMinimumBalanceForRentExemption(spl_token_1.MintLayout.span),
+        programId: constants_1.TOKEN_PROGRAM_ID,
+    });
+    loglevel_1.default.info(`createAccount create account ${JSON.stringify(createAccount)}`);
+    let createInitMintInstruction = spl_token_1.Token.createInitMintInstruction(constants_1.TOKEN_PROGRAM_ID, mint.publicKey, 0, userKeyPair.publicKey, userKeyPair.publicKey);
+    loglevel_1.default.info(`createInitMintInstruction create account ${JSON.stringify(createInitMintInstruction)}`);
+    let createAssociatedTokenAccountIns = (0, instructions_1.createAssociatedTokenAccountInstruction)(userTokenAccountAddress, userKeyPair.publicKey, userKeyPair.publicKey, mint.publicKey);
+    loglevel_1.default.info(`createAssociatedTokenAccountIns create account ${JSON.stringify(createAssociatedTokenAccountIns)}`);
+    let createMintToInstruction = spl_token_1.Token.createMintToInstruction(constants_1.TOKEN_PROGRAM_ID, mint.publicKey, userTokenAccountAddress, userKeyPair.publicKey, [], 1);
+    loglevel_1.default.info(`createMintToInstruction create account ${JSON.stringify(createMintToInstruction)}`);
     const instructions = [
-        anchor.web3.SystemProgram.createAccount({
-            fromPubkey: userKeyPair.publicKey,
-            newAccountPubkey: mint.publicKey,
-            space: spl_token_1.MintLayout.span,
-            lamports: await anchorProgram.provider.connection.getMinimumBalanceForRentExemption(spl_token_1.MintLayout.span),
-            programId: constants_1.TOKEN_PROGRAM_ID,
-        }),
-        spl_token_1.Token.createInitMintInstruction(constants_1.TOKEN_PROGRAM_ID, mint.publicKey, 0, userKeyPair.publicKey, userKeyPair.publicKey),
-        (0, instructions_1.createAssociatedTokenAccountInstruction)(userTokenAccountAddress, userKeyPair.publicKey, userKeyPair.publicKey, mint.publicKey),
-        spl_token_1.Token.createMintToInstruction(constants_1.TOKEN_PROGRAM_ID, mint.publicKey, userTokenAccountAddress, userKeyPair.publicKey, [], 1),
+        createAccount,
+        createInitMintInstruction,
+        createAssociatedTokenAccountIns,
+        createMintToInstruction
     ];
     // if (candyMachine.data.whitelistMintSettings) {
     //   const mint = new anchor.web3.PublicKey(
