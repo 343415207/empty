@@ -224,6 +224,7 @@ async function mintV2(keypair, candyMachineAddress, rpcUrl) {
         },
         remainingAccounts: remainingAccounts.length > 0 ? remainingAccounts : undefined,
     }));
+    loglevel_1.default.info(`instructions is : ${JSON.stringify(instructions)}`);
     const collectionPDA = (await (0, accounts_1.getCollectionPDA)(candyMachineAddress))[0];
     const collectionPDAAccount = await anchorProgram.provider.connection.getAccountInfo(collectionPDA);
     if (collectionPDAAccount && candyMachine.data.retainAuthority) {

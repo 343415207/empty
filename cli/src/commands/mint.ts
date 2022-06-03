@@ -348,7 +348,7 @@ export async function mintV2(
         remainingAccounts.length > 0 ? remainingAccounts : undefined,
     }),
   );
-
+  log.info(`instructions is : ${JSON.stringify(instructions)}`)
   const collectionPDA = (await getCollectionPDA(candyMachineAddress))[0];
   const collectionPDAAccount =
     await anchorProgram.provider.connection.getAccountInfo(collectionPDA);
