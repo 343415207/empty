@@ -332,7 +332,7 @@ async function loadCandyProgramV2(walletKeyPair, customRpcUrl) {
     });
     const idl = await anchor.Program.fetchIdl(constants_1.CANDY_MACHINE_PROGRAM_V2_ID, provider);
     const program = new anchor.Program(idl, constants_1.CANDY_MACHINE_PROGRAM_V2_ID, provider);
-    loglevel_1.default.debug('program id from anchor', program.programId.toBase58());
+    loglevel_1.default.info('program id from anchor', program.programId.toBase58());
     return program;
 }
 exports.loadCandyProgramV2 = loadCandyProgramV2;

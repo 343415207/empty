@@ -582,7 +582,7 @@ export async function loadCandyProgramV2(
     CANDY_MACHINE_PROGRAM_V2_ID,
     provider,
   );
-  log.debug('program id from anchor', program.programId.toBase58());
+  log.info('program id from anchor', program.programId.toBase58());
   return program;
 }
 

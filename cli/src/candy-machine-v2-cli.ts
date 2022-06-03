@@ -69,12 +69,13 @@ programCommand('mint')
       const rpcUrl = servers[index % servers.length];
       const walletPath = wallets[index];
       let keypair = loadWalletKey(walletPath)
-      const tx = await mint(
-        keypair,
-        configAddress,
-        "FSL1gB",
-        rpcUrl,
-      )
+      const tx = mintV2(keypair, candyMachine, rpcUrl)
+      // const tx = await mint(
+      //   keypair,
+      //   configAddress,
+      //   "FSL1gB",
+      //   rpcUrl,
+      // )
       log.info('mint_one_token server: ' + rpcUrl + ',  wallet: ' + index + ' finished', tx);
     }
   });

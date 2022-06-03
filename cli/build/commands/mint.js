@@ -104,7 +104,8 @@ async function mintV2(keypair, candyMachineAddress, rpcUrl) {
     var _a, _b, _c;
     const mint = web3_js_1.Keypair.generate();
     const userKeyPair = keypair;
-    const anchorProgram = await (0, accounts_1.loadCandyProgramV2)(userKeyPair, rpcUrl);
+    // const anchorProgram = await loadCandyProgramV2(userKeyPair, rpcUrl);
+    const anchorProgram = await (0, accounts_1.loadCandyProgram)(userKeyPair, rpcUrl);
     const userTokenAccountAddress = await (0, accounts_1.getTokenWallet)(userKeyPair.publicKey, mint.publicKey);
     const candyMachine = await anchorProgram.account.candyMachine.fetch(candyMachineAddress);
     console.log("CandyMachine : ", candyMachine);
