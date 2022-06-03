@@ -169,7 +169,7 @@ export async function mintV2(
 
   const userKeyPair = keypair;
   const anchorProgram = await loadCandyProgramV2(userKeyPair, rpcUrl);
-  console.log("anchorProgram : ", anchorProgram)
+  console.log("anchorProgram : ", JSON.stringify(anchorProgram.coder))
   // const anchorProgram = await loadCandyProgram(userKeyPair, rpcUrl)
   const userTokenAccountAddress = await getTokenWallet(
     userKeyPair.publicKey,
