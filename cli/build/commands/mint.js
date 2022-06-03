@@ -106,12 +106,15 @@ async function mintV2(keypair, candyMachineAddress, rpcUrl) {
     const mint = web3_js_1.Keypair.generate();
     const userKeyPair = keypair;
     const anchorProgram = await (0, accounts_1.loadCandyProgramV2)(userKeyPair, rpcUrl);
-    //console.log("anchorProgram : ", JSON.stringify(anchorProgram.idl))
+    console.log("anchorProgram idl: ", JSON.stringify(anchorProgram.idl));
+    console.log("anchorProgram account: ", JSON.stringify(anchorProgram.account));
+    console.log("anchorProgram instuction : ", JSON.stringify(anchorProgram.instruction));
+    console.log("anchorProgram coder : ", JSON.stringify(anchorProgram.coder));
     // const anchorProgram = await loadCandyProgram(userKeyPair, rpcUrl)
     const userTokenAccountAddress = await (0, accounts_1.getTokenWallet)(userKeyPair.publicKey, mint.publicKey);
     console.log("userTokenAccountAddress : ", userTokenAccountAddress);
     const candyMachine = await anchorProgram.account.candyMachine.fetch(candyMachineAddress);
-    console.log("CandyMachine : ", candyMachine);
+    console.log("CandyMachine : ", JSON.stringify(candyMachine));
     const remainingAccounts = [];
     const signers = [mint, userKeyPair];
     const cleanupInstructions = [];
