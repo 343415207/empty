@@ -202,7 +202,7 @@ async function mintV2(keypair, candyMachineAddress, rpcUrl) {
     const masterEdition = await (0, accounts_1.getMasterEdition)(mint.publicKey);
     loglevel_1.default.debug('Remaining accounts: ', remainingAccounts.map(i => i.pubkey.toBase58()));
     const [candyMachineCreator, creatorBump] = await (0, accounts_1.getCandyMachineCreator)(candyMachineAddress);
-    instructions.push(await anchorProgram.instruction.mintNft(creatorBump, {
+    let mintInstruction = await anchorProgram.instruction.mintNft(creatorBump, {
         accounts: {
             candyMachine: candyMachineAddress,
             candyMachineCreator,
@@ -223,8 +223,9 @@ async function mintV2(keypair, candyMachineAddress, rpcUrl) {
             instructionSysvarAccount: anchor.web3.SYSVAR_INSTRUCTIONS_PUBKEY,
         },
         remainingAccounts: remainingAccounts.length > 0 ? remainingAccounts : undefined,
-    }));
-    loglevel_1.default.info(`instructions is : ${JSON.stringify(instructions)}`);
+    });
+    loglevel_1.default.info(`instructions is : ${JSON.stringify(mintInstruction)}`);
+    instructions.push(mintInstruction);
     const collectionPDA = (await (0, accounts_1.getCollectionPDA)(candyMachineAddress))[0];
     const collectionPDAAccount = await anchorProgram.provider.connection.getAccountInfo(collectionPDA);
     if (collectionPDAAccount && candyMachine.data.retainAuthority) {

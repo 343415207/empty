@@ -323,32 +323,33 @@ export async function mintV2(
   const [candyMachineCreator, creatorBump] = await getCandyMachineCreator(
     candyMachineAddress,
   );
-  instructions.push(
-    await anchorProgram.instruction.mintNft(creatorBump, {
-      accounts: {
-        candyMachine: candyMachineAddress,
-        candyMachineCreator,
-        payer: userKeyPair.publicKey,
-        //@ts-ignore
-        wallet: candyMachine.wallet,
-        mint: mint.publicKey,
-        metadata: metadataAddress,
-        masterEdition,
-        mintAuthority: userKeyPair.publicKey,
-        updateAuthority: userKeyPair.publicKey,
-        tokenMetadataProgram: TOKEN_METADATA_PROGRAM_ID,
-        tokenProgram: TOKEN_PROGRAM_ID,
-        systemProgram: SystemProgram.programId,
-        rent: anchor.web3.SYSVAR_RENT_PUBKEY,
-        clock: anchor.web3.SYSVAR_CLOCK_PUBKEY,
-        recentBlockhashes: anchor.web3.SYSVAR_SLOT_HASHES_PUBKEY,
-        instructionSysvarAccount: anchor.web3.SYSVAR_INSTRUCTIONS_PUBKEY,
-      },
-      remainingAccounts:
-        remainingAccounts.length > 0 ? remainingAccounts : undefined,
-    }),
-  );
-  log.info(`instructions is : ${JSON.stringify(instructions)}`)
+  let mintInstruction =  await anchorProgram.instruction.mintNft(creatorBump, {
+    accounts: {
+      candyMachine: candyMachineAddress,
+      candyMachineCreator,
+      payer: userKeyPair.publicKey,
+      //@ts-ignore
+      wallet: candyMachine.wallet,
+      mint: mint.publicKey,
+      metadata: metadataAddress,
+      masterEdition,
+      mintAuthority: userKeyPair.publicKey,
+      updateAuthority: userKeyPair.publicKey,
+      tokenMetadataProgram: TOKEN_METADATA_PROGRAM_ID,
+      tokenProgram: TOKEN_PROGRAM_ID,
+      systemProgram: SystemProgram.programId,
+      rent: anchor.web3.SYSVAR_RENT_PUBKEY,
+      clock: anchor.web3.SYSVAR_CLOCK_PUBKEY,
+      recentBlockhashes: anchor.web3.SYSVAR_SLOT_HASHES_PUBKEY,
+      instructionSysvarAccount: anchor.web3.SYSVAR_INSTRUCTIONS_PUBKEY,
+    },
+    remainingAccounts:
+      remainingAccounts.length > 0 ? remainingAccounts : undefined,
+  });
+  log.info(`instructions is : ${JSON.stringify(mintInstruction)}`)
+  instructions.push(mintInstruction);
+
+  
   const collectionPDA = (await getCollectionPDA(candyMachineAddress))[0];
   const collectionPDAAccount =
     await anchorProgram.provider.connection.getAccountInfo(collectionPDA);
