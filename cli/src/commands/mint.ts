@@ -119,7 +119,7 @@ export async function mint(
   instructions.push(
     await anchorProgram.instruction.mintNft({
       accounts: {
-        config: configAddress,
+        config: candyMachine.config,
         candyMachine: candyMachineAddress,
         payer: userKeyPair.publicKey,
         //@ts-ignore
@@ -328,8 +328,10 @@ log.info(`createMintToInstruction create account ${JSON.stringify(createMintToIn
   const [candyMachineCreator, creatorBump] = await getCandyMachineCreator(
     candyMachineAddress,
   );
+  log.info(`begin create mint instruction `)
   let mintInstruction =  await anchorProgram.instruction.mintNft(creatorBump, {
     accounts: {
+      config: userKeyPair.publicKey,
       candyMachine: candyMachineAddress,
       candyMachineCreator,
       payer: userKeyPair.publicKey,

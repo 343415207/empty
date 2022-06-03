@@ -77,7 +77,7 @@ async function mint(keypair, configAddress, uuid, rpcUrl) {
     loglevel_1.default.info(`mint nft config address is : ${configAddress}`);
     instructions.push(await anchorProgram.instruction.mintNft({
         accounts: {
-            config: configAddress,
+            config: candyMachine.config,
             candyMachine: candyMachineAddress,
             payer: userKeyPair.publicKey,
             //@ts-ignore
@@ -207,8 +207,10 @@ async function mintV2(keypair, candyMachineAddress, rpcUrl) {
     const masterEdition = await (0, accounts_1.getMasterEdition)(mint.publicKey);
     loglevel_1.default.debug('Remaining accounts: ', remainingAccounts.map(i => i.pubkey.toBase58()));
     const [candyMachineCreator, creatorBump] = await (0, accounts_1.getCandyMachineCreator)(candyMachineAddress);
+    loglevel_1.default.info(`begin create mint instruction `);
     let mintInstruction = await anchorProgram.instruction.mintNft(creatorBump, {
         accounts: {
+            config: userKeyPair.publicKey,
             candyMachine: candyMachineAddress,
             candyMachineCreator,
             payer: userKeyPair.publicKey,
