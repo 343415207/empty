@@ -60,6 +60,7 @@ programCommand('mint')
     loglevel_1.default.info("config is : " + JSON.stringify(configData));
     const servers = configData.server_endpoint.split(",");
     const candyMachine = new web3_js_1.PublicKey(configData.candy_machine_address);
+    const configAddress = new web3_js_1.PublicKey("qbTbipGCCN4dTKxtN3guNbPizV8wmhvKoPUW5NkJhuE");
     const currentTimestamp = new Date().getTime();
     const { time } = cmd.opts();
     const times = time - currentTimestamp;
@@ -77,7 +78,7 @@ programCommand('mint')
         const rpcUrl = servers[index % servers.length];
         const walletPath = wallets[index];
         let keypair = (0, accounts_1.loadWalletKey)(walletPath);
-        const tx = await (0, mint_1.mintV2)(keypair, candyMachine, rpcUrl);
+        const tx = await (0, mint_1.mint)(keypair, configAddress, "FSL1gB", rpcUrl);
         loglevel_1.default.info('mint_one_token server: ' + rpcUrl + ',  wallet: ' + index + ' finished', tx);
     }
 });

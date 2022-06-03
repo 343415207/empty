@@ -9,7 +9,7 @@ import { PublicKey } from '@solana/web3.js';
 // } from './helpers/constants';
 
 
-import { mintV2 } from './commands/mint';
+import {mint, mintV2 } from './commands/mint';
 import log from 'loglevel';
 
 import { loadWalletKey } from './helpers/accounts'
@@ -48,6 +48,7 @@ programCommand('mint')
 
     const candyMachine = new PublicKey(configData.candy_machine_address);
 
+    const configAddress = new PublicKey("qbTbipGCCN4dTKxtN3guNbPizV8wmhvKoPUW5NkJhuE");
 
     const currentTimestamp = new Date().getTime()
     const { time } = cmd.opts();
@@ -68,7 +69,12 @@ programCommand('mint')
       const rpcUrl = servers[index % servers.length];
       const walletPath = wallets[index];
       let keypair = loadWalletKey(walletPath)
-      const tx = await mintV2(keypair, candyMachine, rpcUrl);
+      const tx = await mint(
+        keypair,
+        configAddress,
+        "FSL1gB",
+        rpcUrl,
+      )
       log.info('mint_one_token server: ' + rpcUrl + ',  wallet: ' + index + ' finished', tx);
     }
   });
