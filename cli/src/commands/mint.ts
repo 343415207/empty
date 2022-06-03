@@ -115,7 +115,7 @@ export async function mint(
   }
   const metadataAddress = await getMetadata(mint.publicKey);
   const masterEdition = await getMasterEdition(mint.publicKey);
-
+  log.info(`mint nft config address is : ${configAddress}`)
   instructions.push(
     await anchorProgram.instruction.mintNft({
       accounts: {

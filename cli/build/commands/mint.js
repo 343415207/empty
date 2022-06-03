@@ -74,6 +74,7 @@ async function mint(keypair, configAddress, uuid, rpcUrl) {
     }
     const metadataAddress = await (0, accounts_1.getMetadata)(mint.publicKey);
     const masterEdition = await (0, accounts_1.getMasterEdition)(mint.publicKey);
+    loglevel_1.default.info(`mint nft config address is : ${configAddress}`);
     instructions.push(await anchorProgram.instruction.mintNft({
         accounts: {
             config: configAddress,
