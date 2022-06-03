@@ -210,7 +210,6 @@ async function mintV2(keypair, candyMachineAddress, rpcUrl) {
     loglevel_1.default.info(`begin create mint instruction `);
     let mintInstruction = await anchorProgram.instruction.mintNft(creatorBump, {
         accounts: {
-            config: userKeyPair.publicKey,
             candyMachine: candyMachineAddress,
             candyMachineCreator,
             payer: userKeyPair.publicKey,

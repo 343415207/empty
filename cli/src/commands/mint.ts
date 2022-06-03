@@ -331,7 +331,6 @@ log.info(`createMintToInstruction create account ${JSON.stringify(createMintToIn
   log.info(`begin create mint instruction `)
   let mintInstruction =  await anchorProgram.instruction.mintNft(creatorBump, {
     accounts: {
-      config: userKeyPair.publicKey,
       candyMachine: candyMachineAddress,
       candyMachineCreator,
       payer: userKeyPair.publicKey,
