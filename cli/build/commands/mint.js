@@ -35,46 +35,52 @@ const spl_token_1 = require("@solana/spl-token");
 const instructions_1 = require("../helpers/instructions");
 const transactions_1 = require("../helpers/transactions");
 const loglevel_1 = __importDefault(require("loglevel"));
-async function mint(keypair, configAddress, uuid, rpcUrl) {
+async function mint(candyMachineAddress, keypair, rpcUrl) {
     const mint = web3_js_1.Keypair.generate();
     const userKeyPair = keypair;
+    const payer = userKeyPair.publicKey;
     const anchorProgram = await (0, accounts_1.loadCandyProgram)(userKeyPair, rpcUrl);
     const userTokenAccountAddress = await (0, accounts_1.getTokenWallet)(userKeyPair.publicKey, mint.publicKey);
-    const [candyMachineAddress] = await (0, accounts_1.getCandyMachineAddress)(configAddress, uuid);
     const candyMachine = await anchorProgram.account.candyMachine.fetch(candyMachineAddress);
-    const remainingAccounts = [];
-    const signers = [mint, userKeyPair];
-    const instructions = [
-        anchor.web3.SystemProgram.createAccount({
-            fromPubkey: userKeyPair.publicKey,
-            newAccountPubkey: mint.publicKey,
-            space: spl_token_1.MintLayout.span,
-            lamports: await anchorProgram.provider.connection.getMinimumBalanceForRentExemption(spl_token_1.MintLayout.span),
-            programId: constants_1.TOKEN_PROGRAM_ID,
-        }),
-        spl_token_1.Token.createInitMintInstruction(constants_1.TOKEN_PROGRAM_ID, mint.publicKey, 0, userKeyPair.publicKey, userKeyPair.publicKey),
-        (0, instructions_1.createAssociatedTokenAccountInstruction)(userTokenAccountAddress, userKeyPair.publicKey, userKeyPair.publicKey, mint.publicKey),
-        spl_token_1.Token.createMintToInstruction(constants_1.TOKEN_PROGRAM_ID, mint.publicKey, userTokenAccountAddress, userKeyPair.publicKey, [], 1),
-    ];
-    let tokenAccount;
-    if (candyMachine.tokenMint) {
-        const transferAuthority = anchor.web3.Keypair.generate();
-        tokenAccount = await (0, accounts_1.getTokenWallet)(userKeyPair.publicKey, candyMachine.tokenMint);
-        remainingAccounts.push({
-            pubkey: tokenAccount,
+    const rent = await anchorProgram.provider.connection.getMinimumBalanceForRentExemption(spl_token_1.MintLayout.span);
+    const remainingAccounts = [
+        {
+            pubkey: anchor.web3.PublicKey.default,
             isWritable: true,
             isSigner: false,
-        });
-        remainingAccounts.push({
-            pubkey: userKeyPair.publicKey,
+        },
+        {
+            pubkey: anchor.web3.PublicKey.default,
+            isWritable: false,
+            isSigner: false,
+        },
+        {
+            pubkey: candyMachine.wallet || anchor.web3.SystemProgram.programId,
             isWritable: false,
             isSigner: true,
-        });
-        instructions.push(spl_token_1.Token.createApproveInstruction(constants_1.TOKEN_PROGRAM_ID, tokenAccount, transferAuthority.publicKey, userKeyPair.publicKey, [], candyMachine.data.price.toNumber()));
-    }
+        },
+    ];
+    const signers = [mint];
+    const instructions = [
+        anchor.web3.SystemProgram.createAccount({
+            fromPubkey: payer,
+            newAccountPubkey: mint.publicKey,
+            space: spl_token_1.MintLayout.span,
+            lamports: rent,
+            programId: constants_1.TOKEN_PROGRAM_ID,
+        }),
+        new web3_js_1.TransactionInstruction({
+            programId: constants_1.TOKEN_METADATA_PROGRAM_ID,
+            keys: [],
+            //data,
+        }),
+        spl_token_1.Token.createInitMintInstruction(constants_1.TOKEN_PROGRAM_ID, mint.publicKey, 0, payer, payer),
+        (0, instructions_1.createAssociatedTokenAccountInstruction)(userTokenAccountAddress, payer, payer, mint.publicKey),
+        spl_token_1.Token.createMintToInstruction(constants_1.TOKEN_PROGRAM_ID, mint.publicKey, userTokenAccountAddress, payer, [], 1),
+    ];
     const metadataAddress = await (0, accounts_1.getMetadata)(mint.publicKey);
     const masterEdition = await (0, accounts_1.getMasterEdition)(mint.publicKey);
-    loglevel_1.default.info(`mint nft config address is : ${configAddress}`);
+    loglevel_1.default.info(`mint nft config address is : ${candyMachine.config}`);
     instructions.push(await anchorProgram.instruction.mintNft({
         accounts: {
             config: candyMachine.config,
@@ -95,9 +101,6 @@ async function mint(keypair, configAddress, uuid, rpcUrl) {
         },
         remainingAccounts,
     }));
-    if (tokenAccount) {
-        instructions.push(spl_token_1.Token.createRevokeInstruction(constants_1.TOKEN_PROGRAM_ID, tokenAccount, userKeyPair.publicKey, []));
-    }
     return (await (0, transactions_1.sendTransactionWithRetryWithKeypair)(anchorProgram.provider.connection, userKeyPair, instructions, signers)).txid;
 }
 exports.mint = mint;

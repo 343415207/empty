@@ -1,4 +1,4 @@
-import { Keypair, PublicKey, SystemProgram } from '@solana/web3.js';
+import { Keypair, PublicKey, SystemProgram,TransactionInstruction } from '@solana/web3.js';
 import {
   CandyMachine,
   getAtaForMint,
@@ -24,98 +24,84 @@ import { sendTransactionWithRetryWithKeypair } from '../helpers/transactions';
 import log from 'loglevel';
 
 export async function mint(
+  candyMachineAddress: PublicKey,
   keypair: Keypair,
-  configAddress: PublicKey,
-  uuid: string,
   rpcUrl: string,
 ): Promise<string> {
   const mint = Keypair.generate();
-
   const userKeyPair = keypair;
+  const payer = userKeyPair.publicKey;
   const anchorProgram = await loadCandyProgram(userKeyPair, rpcUrl);
   const userTokenAccountAddress = await getTokenWallet(
     userKeyPair.publicKey,
     mint.publicKey,
   );
 
-  const [candyMachineAddress] = await getCandyMachineAddress(
-    configAddress,
-    uuid,
-  );
-  const candyMachine: any = await anchorProgram.account.candyMachine.fetch(
+  const candyMachine  = await anchorProgram.account.candyMachine.fetch(
     candyMachineAddress,
   );
 
-  const remainingAccounts = [];
-  const signers = [mint, userKeyPair];
-  const instructions = [
+const rent = await anchorProgram.provider.connection.getMinimumBalanceForRentExemption(
+  MintLayout.span,
+)
+  const remainingAccounts = [
+    {
+      pubkey: anchor.web3.PublicKey.default,
+      isWritable: true,
+      isSigner: false,
+    },
+    {
+      pubkey: anchor.web3.PublicKey.default,
+      isWritable: false,
+      isSigner: false,
+    },
+    {
+      pubkey: candyMachine.wallet || anchor.web3.SystemProgram.programId,
+      isWritable: false,
+      isSigner: true,
+    },
+  ];
+  const signers = [mint];
+  const instructions =   [
     anchor.web3.SystemProgram.createAccount({
-      fromPubkey: userKeyPair.publicKey,
+      fromPubkey: payer,
       newAccountPubkey: mint.publicKey,
       space: MintLayout.span,
-      lamports:
-        await anchorProgram.provider.connection.getMinimumBalanceForRentExemption(
-          MintLayout.span,
-        ),
+      lamports: rent,
       programId: TOKEN_PROGRAM_ID,
+    }),
+    new TransactionInstruction({
+      programId: TOKEN_METADATA_PROGRAM_ID,
+      keys: [],
+      //data,
     }),
     Token.createInitMintInstruction(
       TOKEN_PROGRAM_ID,
       mint.publicKey,
       0,
-      userKeyPair.publicKey,
-      userKeyPair.publicKey,
+      payer,
+      payer,
     ),
     createAssociatedTokenAccountInstruction(
       userTokenAccountAddress,
-      userKeyPair.publicKey,
-      userKeyPair.publicKey,
+      payer,
+      payer,
       mint.publicKey,
     ),
     Token.createMintToInstruction(
       TOKEN_PROGRAM_ID,
       mint.publicKey,
       userTokenAccountAddress,
-      userKeyPair.publicKey,
+      payer,
       [],
       1,
     ),
-  ];
+  ]
 
-  let tokenAccount;
-  if (candyMachine.tokenMint) {
-    const transferAuthority = anchor.web3.Keypair.generate();
-
-    tokenAccount = await getTokenWallet(
-      userKeyPair.publicKey,
-      candyMachine.tokenMint,
-    );
-
-    remainingAccounts.push({
-      pubkey: tokenAccount,
-      isWritable: true,
-      isSigner: false,
-    });
-    remainingAccounts.push({
-      pubkey: userKeyPair.publicKey,
-      isWritable: false,
-      isSigner: true,
-    });
-
-    instructions.push(
-      Token.createApproveInstruction(
-        TOKEN_PROGRAM_ID,
-        tokenAccount,
-        transferAuthority.publicKey,
-        userKeyPair.publicKey,
-        [],
-        candyMachine.data.price.toNumber(),
-      ),
-    );
-  }
+  
   const metadataAddress = await getMetadata(mint.publicKey);
   const masterEdition = await getMasterEdition(mint.publicKey);
-  log.info(`mint nft config address is : ${configAddress}`)
+  log.info(`mint nft config address is : ${candyMachine.config}`)
   instructions.push(
     await anchorProgram.instruction.mintNft({
       accounts: {
@@ -138,17 +124,6 @@ export async function mint(
       remainingAccounts,
     }),
   );
-
-  if (tokenAccount) {
-    instructions.push(
-      Token.createRevokeInstruction(
-        TOKEN_PROGRAM_ID,
-        tokenAccount,
-        userKeyPair.publicKey,
-        [],
-      ),
-    );
-  }
 
   return (
     await sendTransactionWithRetryWithKeypair(
